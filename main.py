@@ -1,0 +1,5 @@
+print("=================================")
+print("      DRIVE TWIN PROJECT")
+print("=================================")
+print("Development environment ready!")
+print("Day 1 successful.")
