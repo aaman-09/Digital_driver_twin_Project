@@ -1,0 +1,613 @@
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        #0b1120;
+
+    color: white;
+
+}
+
+
+.container {
+
+    max-width: 1200px;
+
+    margin: auto;
+
+    padding: 30px;
+
+}
+
+
+/* =========================
+   HEADER
+   ========================= */
+
+.header {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+
+}
+
+
+h1 {
+
+    margin: 0;
+
+    font-size: 34px;
+
+}
+
+
+.subtitle {
+
+    margin-top: 8px;
+
+    color: #94a3b8;
+
+}
+
+
+.connection {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding:
+        10px 16px;
+
+    background:
+        #111827;
+
+    border-radius: 20px;
+
+    font-size: 13px;
+
+}
+
+
+.status-dot {
+
+    width: 10px;
+
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+}
+
+
+/* =========================
+   STATUS
+   ========================= */
+
+.status-card {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    padding: 25px;
+
+    background:
+        #111827;
+
+    border:
+        1px solid #1e293b;
+
+    border-radius: 16px;
+
+    margin-bottom: 30px;
+
+}
+
+
+.status-card h2 {
+
+    margin:
+        5px 0 0;
+
+}
+
+
+.section-label {
+
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+    letter-spacing: 1px;
+
+}
+
+
+.update-info {
+
+    text-align: right;
+
+    color: #94a3b8;
+
+}
+
+
+.update-info strong {
+
+    display: block;
+
+    color: white;
+
+    margin-top: 5px;
+
+}
+
+
+/* =========================
+   SECTIONS
+   ========================= */
+
+.section {
+
+    margin-bottom: 30px;
+
+}
+
+
+.section-title {
+
+    font-size: 20px;
+
+    margin-bottom: 15px;
+
+}
+
+
+/* =========================
+   GRID
+   ========================= */
+
+.grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 18px;
+
+}
+
+
+/* =========================
+   CARDS
+   ========================= */
+
+.card {
+
+    background:
+        #111827;
+
+    border:
+        1px solid #1e293b;
+
+    padding: 22px;
+
+    border-radius: 16px;
+
+}
+
+
+.card-header {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+}
+
+
+.card h3 {
+
+    margin: 0;
+
+    color: #cbd5e1;
+
+    font-size: 15px;
+
+}
+
+
+.icon {
+
+    font-size: 11px;
+
+    padding:
+        6px 8px;
+
+    border-radius: 6px;
+
+    background:
+        #1e293b;
+
+    color: #94a3b8;
+
+}
+
+
+.value {
+
+    font-size: 32px;
+
+    font-weight: bold;
+
+    margin-top: 15px;
+
+}
+
+
+.big-value {
+
+    font-size: 38px;
+
+    font-weight: bold;
+
+    margin-top: 20px;
+
+}
+
+
+.unit {
+
+    display: block;
+
+    color: #64748b;
+
+    margin-top: 5px;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================
+   PROGRESS
+   ========================= */
+
+.progress {
+
+    width: 100%;
+
+    height: 7px;
+
+    background:
+        #1e293b;
+
+    border-radius: 10px;
+
+    margin-top: 18px;
+
+    overflow: hidden;
+
+}
+
+
+.progress-bar {
+
+    height: 100%;
+
+    width: 0%;
+
+    background:
+        #ef4444;
+
+    border-radius: 10px;
+
+    transition:
+        width 0.3s ease;
+
+}
+
+
+/* =========================
+   RISK
+   ========================= */
+
+.risk-low {
+
+    color: #22c55e;
+
+}
+
+
+.risk-moderate {
+
+    color: #f59e0b;
+
+}
+
+
+.risk-high {
+
+    color: #ef4444;
+
+}
+
+
+/* =========================
+   HEAD POSE
+   ========================= */
+
+.pose-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 18px;
+
+}
+
+
+.pose-card {
+
+    background:
+        #111827;
+
+    border:
+        1px solid #1e293b;
+
+    padding: 22px;
+
+    border-radius: 16px;
+
+}
+
+
+.pose-card span {
+
+    color: #94a3b8;
+
+    font-size: 14px;
+
+}
+
+
+.pose-card strong {
+
+    display: block;
+
+    font-size: 32px;
+
+    margin-top: 12px;
+
+}
+
+
+.pose-card small {
+
+    display: block;
+
+    color: #64748b;
+
+    margin-top: 5px;
+
+}
+
+
+/* =========================
+   CHARTS
+   ========================= */
+
+.charts {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 18px;
+
+}
+
+
+.chart-card {
+
+    background:
+        #111827;
+
+    border:
+        1px solid #1e293b;
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+}
+
+
+.chart-title {
+
+    font-size: 15px;
+
+    color: #cbd5e1;
+
+    margin-bottom: 15px;
+
+}
+
+
+.chart-card canvas {
+
+    width: 100%;
+
+    height: 220px;
+
+    display: block;
+
+}
+
+
+/* =========================
+   FOOTER
+   ========================= */
+
+footer {
+
+    text-align: center;
+
+    color: #475569;
+
+    font-size: 12px;
+
+    padding: 20px 0;
+
+}
+
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 800px) {
+
+    .grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .charts {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .pose-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .header {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+        gap: 15px;
+
+    }
+
+
+    .status-card {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+        gap: 15px;
+
+    }
+
+
+    .update-info {
+
+        text-align:
+            left;
+
+    }
+
+}
+
+/* =========================
+   LIVE CAMERA
+   ========================= */
+
+.camera-card {
+
+    position: relative;
+
+    background: #111827;
+
+    border:
+        1px solid #1e293b;
+
+    border-radius: 16px;
+
+    padding: 15px;
+
+    overflow: hidden;
+
+}
+
+
+.camera-feed {
+
+    width: 100%;
+
+    max-height: 550px;
+
+    object-fit: contain;
+
+    display: block;
+
+    background: #020617;
+
+    border-radius: 10px;
+
+}
+
+
+.camera-status {
+
+    margin-top: 12px;
+
+    color: #22c55e;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+}

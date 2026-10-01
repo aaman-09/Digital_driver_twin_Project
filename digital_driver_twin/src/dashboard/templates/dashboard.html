@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Digital Driver Twin</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <div>
+            <h1>Digital Driver Twin</h1>
+
+            <p class="subtitle">
+                AI-Based Real-Time Driver Monitoring System
+            </p>
+        </div>
+
+        <div class="connection">
+            <span class="status-dot"></span>
+            <span id="connection-text">CONNECTING</span>
+        </div>
+
+    </header>
+
+
+    <!-- DRIVER STATUS -->
+
+    <section class="status-card">
+
+        <div>
+
+            <p class="section-label">
+                DRIVER STATUS
+            </p>
+
+            <h2 id="status">
+                CONNECTING...
+            </h2>
+
+        </div>
+
+        <div class="update-info">
+
+            <span>Last Update</span>
+
+            <strong id="last-update">
+                --
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <!-- PRIMARY METRICS -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Driver Monitoring
+        </h2>
+
+
+        <div class="grid primary-grid">
+
+
+            <!-- DROWSINESS -->
+
+            <div class="card main-card">
+
+                <div class="card-header">
+
+                    <h3>Drowsiness Score</h3>
+
+                    <span class="icon">
+                        DS
+                    </span>
+
+                </div>
+
+                <div
+                    class="big-value"
+                    id="drowsiness-score"
+                >
+                    --
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        id="drowsiness-progress"
+                        class="progress-bar"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RISK -->
+
+            <div class="card main-card">
+
+                <div class="card-header">
+
+                    <h3>Overall Risk</h3>
+
+                    <span class="icon">
+                        RK
+                    </span>
+
+                </div>
+
+                <div
+                    class="big-value"
+                    id="risk-level"
+                >
+                    --
+                </div>
+
+            </div>
+
+
+            <!-- PERCLOS -->
+
+            <div class="card main-card">
+
+                <div class="card-header">
+
+                    <h3>PERCLOS</h3>
+
+                    <span class="icon">
+                        PE
+                    </span>
+
+                </div>
+
+                <div
+                    class="big-value"
+                    id="perclos"
+                >
+                    --
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- SECONDARY METRICS -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Vision Metrics
+        </h2>
+
+
+        <div class="grid">
+
+
+            <div class="card">
+
+                <h3>Eye Aspect Ratio</h3>
+
+                <div
+                    class="value"
+                    id="ear"
+                >
+                    --
+                </div>
+
+                <span class="unit">
+                    EAR
+                </span>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>Mouth Aspect Ratio</h3>
+
+                <div
+                    class="value"
+                    id="mar"
+                >
+                    --
+                </div>
+
+                <span class="unit">
+                    MAR
+                </span>
+
+            </div>
+
+
+            <div class="card">
+
+                <h3>Yawns</h3>
+
+                <div
+                    class="value"
+                    id="yawns"
+                >
+                    --
+                </div>
+
+                <span class="unit">
+                    Detected
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- HEAD POSE -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Head Pose
+        </h2>
+
+
+        <div class="pose-grid">
+
+
+            <div class="pose-card">
+
+                <span>Pitch</span>
+
+                <strong id="pitch">
+                    --
+                </strong>
+
+                <small>
+                    Vertical rotation
+                </small>
+
+            </div>
+
+
+            <div class="pose-card">
+
+                <span>Yaw</span>
+
+                <strong id="yaw">
+                    --
+                </strong>
+
+                <small>
+                    Horizontal rotation
+                </small>
+
+            </div>
+
+
+            <div class="pose-card">
+
+                <span>Roll</span>
+
+                <strong id="roll">
+                    --
+                </strong>
+
+                <small>
+                    Head tilt
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- VEHICLE & IMU SENSOR DATA -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Vehicle & Sensor Monitoring
+        </h2>
+
+        <div class="grid">
+
+            <!-- IMU YAW -->
+            <div class="card">
+                <h3>IMU Yaw</h3>
+
+                <div class="value" id="imu-yaw">
+                    --
+                </div>
+
+                <span class="unit">
+                    Degrees
+                </span>
+            </div>
+
+
+            <!-- IMU PITCH -->
+            <div class="card">
+                <h3>IMU Pitch</h3>
+
+                <div class="value" id="imu-pitch">
+                    --
+                </div>
+
+                <span class="unit">
+                    Degrees
+                </span>
+            </div>
+
+
+            <!-- IMU ROLL -->
+            <div class="card">
+                <h3>IMU Roll</h3>
+
+                <div class="value" id="imu-roll">
+                    --
+                </div>
+
+                <span class="unit">
+                    Degrees
+                </span>
+            </div>
+
+
+            <!-- SPEED -->
+            <div class="card">
+                <h3>Vehicle Speed</h3>
+
+                <div class="value" id="vehicle-speed">
+                    --
+                </div>
+
+                <span class="unit">
+                    km/h
+                </span>
+            </div>
+
+
+            <!-- ACCELERATION -->
+            <div class="card">
+                <h3>Acceleration</h3>
+
+                <div class="value" id="vehicle-acceleration">
+                    --
+                </div>
+
+                <span class="unit">
+                    m/s²
+                </span>
+            </div>
+
+
+            <!-- BRAKING -->
+            <div class="card">
+                <h3>Braking</h3>
+
+                <div class="value" id="vehicle-braking">
+                    --
+                </div>
+
+                <span class="unit">
+                    Vehicle Status
+                </span>
+            </div>
+
+
+            <!-- STEERING -->
+            <div class="card">
+                <h3>Steering Angle</h3>
+
+                <div class="value" id="steering-angle">
+                    --
+                </div>
+
+                <span class="unit">
+                    Degrees
+                </span>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- DISTRACTION DETECTION -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Distraction Monitoring
+        </h2>
+
+        <div class="card main-card">
+
+            <div class="card-header">
+
+                <h3>Distraction Status</h3>
+
+                <span class="icon">
+                    DT
+                </span>
+
+            </div>
+
+            <div
+                class="big-value"
+                id="distraction-status"
+            >
+                --
+            </div>
+
+            <div
+                class="unit"
+                id="distraction-duration"
+            >
+                Duration: 0.0 sec
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- DRIVER BEHAVIOUR ANALYSIS -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Driver Behaviour Analysis
+        </h2>
+
+        <div class="metrics-grid">
+
+            <!-- Session Time -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Session Time</h3>
+                    <span class="icon">ST</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="session-time"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Total Monitoring Time
+                </div>
+            </div>
+
+
+            <!-- Distraction Events -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Distraction Events</h3>
+                    <span class="icon">DE</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="distraction-events"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Detected Events
+                </div>
+            </div>
+
+
+            <!-- Distraction Duration -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Distraction Time</h3>
+                    <span class="icon">DT</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="total-distraction-time"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Total Duration
+                </div>
+            </div>
+
+
+            <!-- Average Yaw -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Average Head Turn</h3>
+                    <span class="icon">AY</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="average-yaw"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Degrees
+                </div>
+            </div>
+
+
+            <!-- Maximum Yaw -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Maximum Head Turn</h3>
+                    <span class="icon">MY</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="maximum-yaw"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Degrees
+                </div>
+            </div>
+
+
+            <!-- Average Drowsiness -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Average Drowsiness</h3>
+                    <span class="icon">AD</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="average-drowsiness"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Score
+                </div>
+            </div>
+
+
+            <!-- Maximum Drowsiness -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Peak Drowsiness</h3>
+                    <span class="icon">PD</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="maximum-drowsiness"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Score
+                </div>
+            </div>
+
+
+            <!-- Total Yawns -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Total Yawns</h3>
+                    <span class="icon">YA</span>
+                </div>
+
+                <div
+                    class="big-value"
+                    id="total-yawns"
+                >
+                    --
+                </div>
+
+                <div class="unit">
+                    Detected During Session
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- LIVE CAMERA -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Live Driver Camera
+        </h2>
+
+        <div class="camera-card">
+
+            <img
+                src="{{ url_for('video_feed') }}"
+                alt="Live Driver Camera"
+                class="camera-feed"
+            >
+
+            <div class="camera-status">
+                ● LIVE DRIVER MONITORING
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- GRAPHS -->
+
+    <section class="section">
+
+        <h2 class="section-title">
+            Real-Time Analysis
+        </h2>
+
+
+        <div class="charts">
+
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    Drowsiness Trend
+                </div>
+
+                <canvas
+                    id="drowsiness-chart"
+                ></canvas>
+
+            </div>
+
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    PERCLOS Trend
+                </div>
+
+                <canvas
+                    id="perclos-chart"
+                ></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <p>
+            Digital Driver Twin |
+            AI Driver Monitoring System
+        </p>
+
+    </footer>
+
+</div>
+
+
+<script>
+
+let drowsinessHistory = [];
+let perclosHistory = [];
+
+const MAX_POINTS = 40;
+
+
+// --------------------------------------------------
+// GET ELEMENT
+// --------------------------------------------------
+
+function get(id) {
+
+    return document.getElementById(id);
+
+}
+
+
+// --------------------------------------------------
+// DRAW GRAPH
+// --------------------------------------------------
+
+function drawChart(canvasId, values, maxValue) {
+
+    const canvas = get(canvasId);
+
+    const ctx = canvas.getContext("2d");
+
+    const width = canvas.width =
+        canvas.clientWidth * window.devicePixelRatio;
+
+    const height = canvas.height =
+        canvas.clientHeight * window.devicePixelRatio;
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    if (values.length < 2) {
+        return;
+    }
+
+
+    const padding = 25;
+
+    const graphWidth =
+        width - padding * 2;
+
+    const graphHeight =
+        height - padding * 2;
+
+
+    // Grid
+
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= 4; i++) {
+
+        const y =
+            padding +
+            (graphHeight / 4) * i;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            padding,
+            y
+        );
+
+        ctx.lineTo(
+            width - padding,
+            y
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    // Graph line
+
+    ctx.beginPath();
+
+    values.forEach(
+        (value, index) => {
+
+            const x =
+                padding +
+                (index /
+                (values.length - 1)) *
+                graphWidth;
+
+            const y =
+                padding +
+                graphHeight -
+                (value / maxValue) *
+                graphHeight;
+
+
+            if (index === 0) {
+
+                ctx.moveTo(x, y);
+
+            } else {
+
+                ctx.lineTo(x, y);
+
+            }
+
+        }
+    );
+
+
+    ctx.lineWidth = 3;
+
+    ctx.stroke();
+
+
+}
+
+async function updateBehaviourAnalysis() {
+
+    try {
+
+        const response =
+            await fetch("/api/behavior");
+
+        const data =
+            await response.json();
+
+        if (data.error) {
+            return;
+        }
+
+        // Session time
+
+        const totalSeconds =
+            Number(data.session_duration);
+
+        const minutes =
+            Math.floor(totalSeconds / 60);
+
+        const seconds =
+            Math.floor(totalSeconds % 60);
+
+        document.getElementById(
+            "session-time"
+        ).textContent =
+            String(minutes).padStart(2, "0")
+            + ":" +
+            String(seconds).padStart(2, "0");
+
+
+        // Distraction events
+
+        document.getElementById(
+            "distraction-events"
+        ).textContent =
+            data.distraction_events;
+
+
+        // Distraction duration
+
+        document.getElementById(
+            "total-distraction-time"
+        ).textContent =
+            Number(
+                data.total_distraction_duration
+            ).toFixed(2) + " s";
+
+
+        // Average yaw
+
+        document.getElementById(
+            "average-yaw"
+        ).textContent =
+            Number(
+                data.average_yaw
+            ).toFixed(2) + "°";
+
+
+        // Maximum yaw
+
+        document.getElementById(
+            "maximum-yaw"
+        ).textContent =
+            Number(
+                data.maximum_yaw
+            ).toFixed(2) + "°";
+
+
+        // Average drowsiness
+
+        document.getElementById(
+            "average-drowsiness"
+        ).textContent =
+            Number(
+                data.average_drowsiness
+            ).toFixed(2);
+
+
+        // Maximum drowsiness
+
+        document.getElementById(
+            "maximum-drowsiness"
+        ).textContent =
+            Number(
+                data.maximum_drowsiness
+            ).toFixed(2);
+
+
+        // Total yawns
+
+        document.getElementById(
+            "total-yawns"
+        ).textContent =
+            data.total_yawns;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Behaviour analysis error:",
+            error
+        );
+
+    }
+}
+
+// --------------------------------------------------
+// UPDATE DASHBOARD
+// --------------------------------------------------
+
+async function updateDashboard() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/status"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "API request failed"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        // Connection
+
+        get(
+            "connection-text"
+        ).textContent =
+            "CONNECTED";
+
+
+        get(
+            "status"
+        ).textContent =
+            "DRIVER MONITORING ACTIVE";
+
+
+        get(
+            "last-update"
+        ).textContent =
+            new Date().toLocaleTimeString();
+
+
+        // Drowsiness
+
+        const score =
+            Number(
+                data.drowsiness_score
+            );
+
+
+        get(
+            "drowsiness-score"
+        ).textContent =
+            score.toFixed(1) + "%";
+
+
+        get(
+            "drowsiness-progress"
+        ).style.width =
+            Math.min(score, 100) + "%";
+
+
+        // Risk
+
+        const risk = data.overall_risk.risk_level.toUpperCase();
+
+        const overallRiskScore = Number(data.overall_risk.risk_score);
+
+
+        get(
+            "risk-level"
+        ).textContent =
+            risk;
+
+
+        get(
+            "risk-level"
+        ).className =
+            "big-value risk-" +
+            risk.toLowerCase();
+
+
+        // EAR
+
+        get(
+            "ear"
+        ).textContent =
+            Number(
+                data.ear
+            ).toFixed(3);
+
+
+        // PERCLOS
+
+        const perclos =
+            Number(
+                data.perclos
+            );
+
+
+        get(
+            "perclos"
+        ).textContent =
+            perclos.toFixed(1) + "%";
+
+
+        // MAR
+
+        get(
+            "mar"
+        ).textContent =
+            Number(
+                data.mar
+            ).toFixed(3);
+
+
+        // Yawns
+
+        get(
+            "yawns"
+        ).textContent =
+            data.yawns;
+
+
+        // Head pose
+
+        get(
+            "pitch"
+        ).textContent =
+            Number(
+                data.pitch
+            ).toFixed(1) + "°";
+
+
+        get(
+            "yaw"
+        ).textContent =
+            Number(
+                data.yaw
+            ).toFixed(1) + "°";
+
+
+        get(
+            "roll"
+        ).textContent =
+            Number(
+                data.roll
+            ).toFixed(1) + "°";
+
+
+        // --------------------------------------------------
+        // IMU DATA
+        // --------------------------------------------------
+
+        const imu = data.imu;
+
+        get("imu-yaw").textContent =
+            Number(imu.yaw).toFixed(1) + "°";
+
+        get("imu-pitch").textContent =
+            Number(imu.pitch).toFixed(1) + "°";
+
+        get("imu-roll").textContent =
+            Number(imu.roll).toFixed(1) + "°";
+
+
+        // --------------------------------------------------
+        // VEHICLE DATA
+        // --------------------------------------------------
+
+        const vehicle = data.vehicle;
+
+        get("vehicle-speed").textContent =
+            Number(vehicle.speed).toFixed(1);
+
+        get("vehicle-acceleration").textContent =
+            Number(vehicle.acceleration).toFixed(2);
+
+        get("vehicle-braking").textContent =
+            vehicle.braking ? "BRAKING" : "NORMAL";
+
+        get("steering-angle").textContent =
+            Number(vehicle.steering_angle).toFixed(1) + "°";    
+
+
+        // Distraction
+        const distractionStatus =
+            get("distraction-status");
+
+        const distractionDuration =
+            Number(
+                data.distraction_duration
+            );
+
+        if (data.distraction_detected) {
+
+            distractionStatus.textContent =
+                "DISTRACTION DETECTED";
+
+            distractionStatus.className =
+                "big-value risk-high";
+
+        } else {
+
+            distractionStatus.textContent =
+                "ATTENTIVE";
+
+            distractionStatus.className =
+                "big-value risk-low";
+
+        }
+
+        get(
+            "distraction-duration"
+        ).textContent =
+            "Duration: " +
+            distractionDuration.toFixed(1) +
+            " sec";
+
+
+        // History
+
+        drowsinessHistory.push(
+            score
+        );
+
+        perclosHistory.push(
+            perclos
+        );
+
+
+        if (
+            drowsinessHistory.length >
+            MAX_POINTS
+        ) {
+
+            drowsinessHistory.shift();
+
+        }
+
+
+        if (
+            perclosHistory.length >
+            MAX_POINTS
+        ) {
+
+            perclosHistory.shift();
+
+        }
+
+        // Draw
+
+        drawChart(
+            "drowsiness-chart",
+            drowsinessHistory,
+            100
+        );
+
+
+        drawChart(
+            "perclos-chart",
+            perclosHistory,
+            100
+        );
+
+
+    }
+
+    catch (error) {
+
+        get(
+            "connection-text"
+        ).textContent =
+            "DISCONNECTED";
+
+
+        get(
+            "status"
+        ).textContent =
+            "CONNECTION ERROR";
+
+
+        console.error(error);
+
+    }
+
+}
+
+
+// --------------------------------------------------
+// START
+// --------------------------------------------------
+
+setInterval(
+    updateDashboard,
+    500
+);
+
+setInterval(
+    updateBehaviourAnalysis,
+    1000
+);
+
+updateBehaviourAnalysis();
+updateDashboard();
+
+</script>
+
+
+</body>
+
+</html>
