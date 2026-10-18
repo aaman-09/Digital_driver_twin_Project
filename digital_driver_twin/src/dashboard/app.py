@@ -2,10 +2,10 @@ from flask import Flask, render_template, jsonify, Response
 import csv
 import os
 import time
+import joblib
+import pandas as pd
 
 from src.analysis.driver_behavior import analyze_session
-from src.sensors.sensor_fusion import SensorFusion
-from src.analysis.risk_engine import RiskEngine
 
 
 app = Flask(__name__)
@@ -28,10 +28,111 @@ FRAME_FILE = os.path.join(
     "latest_frame.jpg"
 )
 
+#H/w code added here
+HARDWARE_CSV = os.path.join(
+    BASE_DIR, "data", "hardware", "esp32_combined_sensor_log.csv"
+)
 
-# Sensor Fusion
-sensor_fusion = SensorFusion()
-risk_engine = RiskEngine()
+# Experimental ML condition classifier
+AI_MODEL_PATH = os.path.join(
+    BASE_DIR, "models", "ml_condition_classifier.joblib"
+)
+
+_ai_bundle = None
+
+
+def get_ai_prediction(driver_data):
+    global _ai_bundle
+
+    unavailable = {
+        "available": False,
+        "condition": "UNAVAILABLE",
+        "confidence": None,
+        "note": "Experimental AI prediction unavailable."
+    }
+
+    try:
+        if not os.path.exists(AI_MODEL_PATH):
+            return unavailable
+
+        if _ai_bundle is None:
+            _ai_bundle = joblib.load(AI_MODEL_PATH)
+
+        features = _ai_bundle["features"]
+        model = _ai_bundle["model"]
+
+        values = {
+            key: float(driver_data[key])
+            for key in features
+        }
+
+        X = pd.DataFrame([values], columns=features)
+        prediction = str(model.predict(X)[0])
+
+        confidence = None
+        if hasattr(model, "predict_proba"):
+            probabilities = model.predict_proba(X)[0]
+            confidence = round(float(max(probabilities)), 3)
+
+        return {
+            "available": True,
+            "condition": prediction,
+            "confidence": confidence,
+            "note": (
+                "Experimental classification of simulated test conditions. "
+                "Not medically validated; does not change safety risk."
+            )
+        }
+
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+        print("AI MODEL ERROR:", e)
+        return unavailable
+
+
+def get_latest_hardware_data():
+    default = {
+        "connected": False,
+        "finger_status": "NO_DATA",
+        "bpm": None,
+        "avg_bpm": None,
+        "accel_g": None,
+        "gyro_x": None,
+        "gyro_y": None,
+        "gyro_z": None,
+        "ir_raw": None
+    }
+
+    try:
+        with open(HARDWARE_CSV, "r", newline="") as file:
+            rows = list(csv.DictReader(file))
+
+        if not rows:
+            return default
+
+        row = rows[-1]
+
+        ax = int(row["ax_raw"])
+        ay = int(row["ay_raw"])
+        az = int(row["az_raw"])
+
+        finger_ok = row["finger_status"] == "FINGER_OK"
+        bpm = float(row["bpm"])
+        avg_bpm = float(row["avg_bpm"])
+
+        return {
+            "connected": True,
+            "finger_status": row["finger_status"],
+            "bpm": bpm if finger_ok and 40 <= bpm <= 200 else None,
+            "avg_bpm": avg_bpm if finger_ok and 40 <= avg_bpm <= 200 else None,
+            "accel_g": round(((ax**2 + ay**2 + az**2)**0.5) / 16384, 3),
+            "gyro_x": round(int(row["gx_corrected"]) / 131, 2),
+            "gyro_y": round(int(row["gy_corrected"]) / 131, 2),
+            "gyro_z": round(int(row["gz_corrected"]) / 131, 2),
+            "ir_raw": int(row["ir_raw"])
+        }
+
+    except (OSError, ValueError, KeyError):
+        return default
 
 
 @app.route("/")
@@ -94,31 +195,58 @@ def get_latest_driver_data():
 def status():
 
     driver_data = get_latest_driver_data()
+    hardware_data = get_latest_hardware_data()
+    ai_prediction = get_ai_prediction(driver_data)
 
-    sensor_data = sensor_fusion.get_combined_data()
-
-    imu_data = sensor_data["imu"]
-    vehicle_data = sensor_data["vehicle"]
-
-    risk_data = risk_engine.calculate_risk(
-        driver_data,
-        imu_data,
-        vehicle_data
-    )
+    # Camera-based risk only.
+    # This is NOT a validated combined driver-health risk score.
+    camera_risk = {
+        "risk_score": driver_data["drowsiness_score"],
+        "risk_level": driver_data["risk_level"],
+        "basis": "camera_drowsiness_only"
+    }
 
     return jsonify({
 
         **driver_data,
-        
+
         "driver": driver_data,
 
-        "imu": imu_data,
+        # No real vehicle IMU/OBD sensor is connected yet.
+        "imu": {
+            "available": False,
+            "message": "Dedicated vehicle IMU data unavailable"
+        },
 
-        "vehicle": vehicle_data,
+        "vehicle": {
+            "available": False,
+            "message": "Vehicle speed, braking and steering sensors not connected"
+        },
 
-        "overall_risk": risk_data
+        "overall_risk": camera_risk,
 
-    })
+        "hardware": hardware_data,
+
+        "ai_prediction": ai_prediction,
+
+        "unified_driver_state": {
+            **driver_data,
+            "hardware_connected": hardware_data["connected"],
+            "finger_status": hardware_data["finger_status"],
+            "bpm": hardware_data["bpm"],
+            "avg_bpm": hardware_data["avg_bpm"],
+            "accel_g": hardware_data["accel_g"],
+            "gyro_x": hardware_data["gyro_x"],
+            "gyro_y": hardware_data["gyro_y"],
+            "gyro_z": hardware_data["gyro_z"],
+            "ir_raw": hardware_data["ir_raw"],
+            "data_sources": {
+                "camera": True,
+                "hardware": hardware_data["connected"]
+            }
+}
+
+})
 
 @app.route("/api/behavior")
 def behavior():

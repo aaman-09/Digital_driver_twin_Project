@@ -9,6 +9,7 @@ from src.fusion.driver_state import driver_state
 from src.fusion.drowsiness_engine import DrowsinessEngine
 from src.fusion.smoothing import ExponentialSmoother
 from src.fusion.data_logger import DataLogger
+from src.fusion.ml_data_logger import MLDataLogger
 
 
 # ============================================================
@@ -125,8 +126,15 @@ landmarker = (
 
 engine = DrowsinessEngine()
 smoother = ExponentialSmoother(alpha=0.2)
+
+# Existing logger — keep the original dataset unchanged
 logger = DataLogger(
     "data/processed/driver_session.csv"
+)
+
+# Separate logger for explicitly labelled ML test sessions
+ml_logger = MLDataLogger(
+    "data/processed/ml_driver_sessions.csv"
 )
 
 
@@ -661,6 +669,21 @@ while True:
 
             )
 
+            # Save labelled ML data only during an active test session
+            ml_logger.log(
+                ear=average_ear,
+                perclos=perclos,
+                mar=mar,
+                yawns=yawn_count,
+                pitch=pitch,
+                yaw=yaw,
+                roll=roll,
+                drowsiness_score=drowsiness_score,
+                risk_level=drowsiness_level,
+                distraction_detected=distraction_detected,
+                distraction_duration=distraction_duration,
+            )
+
             last_log_time = current_time
 
 
@@ -941,8 +964,30 @@ while True:
     # QUIT
     # ========================================================
 
-    if cv2.waitKey(1) & 0xFF == ord("q"):
+    key = cv2.waitKey(1) & 0xFF
 
+    if key == ord("1"):
+        session_id = ml_logger.start_session("normal")
+        print(f"\n[ML] Normal session started: {session_id}")
+
+    elif key == ord("2"):
+        session_id = ml_logger.start_session(
+            "simulated_eye_closure"
+        )
+        print(f"\n[ML] Simulated eye-closure session started: {session_id}")
+
+    elif key == ord("3"):
+        session_id = ml_logger.start_session(
+            "simulated_distraction"
+        )
+        print(f"\n[ML] Simulated distraction session started: {session_id}")
+
+    elif key == ord("0"):
+        ml_logger.stop_session()
+        print("\n[ML] Session stopped. No further ML rows will be recorded.")
+
+    elif key == ord("q"):
+        ml_logger.stop_session()
         break
 
 
