@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, Response
+from flask import Flask, render_template, jsonify, Response, request
 import csv
 import os
 import time
@@ -6,6 +6,10 @@ import joblib
 import pandas as pd
 
 from src.analysis.driver_behavior import analyze_session
+from src.fusion.driver_profiles import (
+    get_all_profiles,
+    create_driver_profile
+)
 
 
 app = Flask(__name__)
@@ -294,6 +298,61 @@ def video_feed():
         generate_frames(),
         mimetype="multipart/x-mixed-replace; boundary=frame"
     )
+
+
+@app.route("/api/profiles", methods=["GET"])
+def list_driver_profiles():
+    """Return all saved driver profiles."""
+    try:
+        return jsonify({
+            "success": True,
+            "profiles": get_all_profiles()
+        })
+    except (OSError, csv.Error) as e:
+        print("DRIVER PROFILE ERROR:", e)
+        return jsonify({
+            "success": False,
+            "message": "Could not load driver profiles."
+        }), 500
+
+
+@app.route("/api/profiles", methods=["POST"])
+def add_driver_profile():
+    """Create a driver profile from dashboard input."""
+    data = request.get_json(silent=True) or {}
+
+    name = data.get("name", "")
+    notes = data.get("notes", "")
+
+    if not isinstance(name, str) or not isinstance(notes, str):
+        return jsonify({
+            "success": False,
+            "message": "Name and notes must be text."
+        }), 400
+
+    success, message = create_driver_profile(name, notes)
+
+    if not success:
+        return jsonify({
+            "success": False,
+            "message": message
+        }), 400
+
+    profiles = get_all_profiles()
+    created_profile = next(
+        (
+            profile for profile in profiles
+            if profile["name"].casefold() == name.strip().casefold()
+        ),
+        None
+    )
+
+    return jsonify({
+        "success": True,
+        "message": message,
+        "profile": created_profile,
+        "profiles": profiles
+    }), 201
 
 
 if __name__ == "__main__":

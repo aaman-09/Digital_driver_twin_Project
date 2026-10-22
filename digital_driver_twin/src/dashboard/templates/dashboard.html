@@ -39,6 +39,57 @@
 
         </section>
 
+        
+        <!-- DRIVER PROFILE MANAGEMENT -->
+        <section class="section">
+            <h2 class="section-title">Driver Profile</h2>
+
+            <div class="camera-card" style="padding: 20px;">
+                <label for="driverSelect">Select Driver</label>
+                <select id="driverSelect" style="display:block; width:100%; margin:10px 0; padding:12px;">
+                    <option value="">Loading profiles...</option>
+                </select>
+
+                <p id="selectedDriverInfo" aria-live="polite">
+                    Loading driver information...
+                </p>
+
+                <details style="margin-top:16px;">
+                    <summary style="cursor:pointer;">+ Create New Driver Profile</summary>
+
+                    <form id="driverProfileForm" style="margin-top:14px;">
+                        <label for="driverName">Driver Name</label>
+                        <input
+                            id="driverName"
+                            name="name"
+                            type="text"
+                            maxlength="100"
+                            required
+                            placeholder="Enter driver name"
+                            style="display:block; width:100%; margin:8px 0 14px; padding:12px;"
+                        >
+
+                        <label for="driverNotes">Notes (optional)</label>
+                        <input
+                            id="driverNotes"
+                            name="notes"
+                            type="text"
+                            maxlength="500"
+                            placeholder="Enter notes"
+                            style="display:block; width:100%; margin:8px 0 14px; padding:12px;"
+                        >
+
+                        <button type="submit" class="btn">
+                            Create Profile
+                        </button>
+                    </form>
+                </details>
+
+                <p id="profileMessage" role="status" aria-live="polite"></p>
+            </div>
+        </section>
+
+
         <header class="header">
 
             <div>
@@ -1210,6 +1261,121 @@
         updateDashboard();
 
     </script>
+
+    
+    <script>
+    (() => {
+        const select = document.getElementById("driverSelect");
+        const info = document.getElementById("selectedDriverInfo");
+        const form = document.getElementById("driverProfileForm");
+        const message = document.getElementById("profileMessage");
+
+        if (!select || !info || !form || !message) return;
+
+        function showMessage(text, isError = false) {
+            message.textContent = text;
+            message.style.color = isError ? "#ff6b81" : "#48e0b0";
+        }
+
+        async function loadProfiles(selectedId = "") {
+            select.replaceChildren(new Option("Loading profiles...", ""));
+
+            try {
+                const response = await fetch("/api/profiles");
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Could not load profiles.");
+                }
+
+                select.replaceChildren();
+
+                if (result.profiles.length === 0) {
+                    select.add(new Option("No profiles yet", ""));
+                    info.textContent = "Create a driver profile to get started.";
+                    return;
+                }
+
+                select.add(new Option("Select a driver", ""));
+
+                result.profiles.forEach(profile => {
+                    const option = new Option(
+                        `${profile.driver_id} — ${profile.name}`,
+                        profile.driver_id
+                    );
+                    select.add(option);
+                });
+
+                const savedId = selectedId || select.value;
+                if (savedId && result.profiles.some(p => p.driver_id === savedId)) {
+                    select.value = savedId;
+                } else {
+                    select.value = result.profiles[0].driver_id;
+                }
+
+                updateSelectedDriver();
+            } catch (error) {
+                select.replaceChildren(new Option("Profiles unavailable", ""));
+                info.textContent = "Could not load driver profiles.";
+                showMessage(error.message, true);
+            }
+        }
+
+        function updateSelectedDriver() {
+            const option = select.options[select.selectedIndex];
+
+            if (!select.value || !option) {
+                info.textContent = "No driver selected.";
+                return;
+            }
+
+            info.textContent = "Selected driver: " + option.text;
+        }
+
+        select.addEventListener("change", updateSelectedDriver);
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+
+            const name = document.getElementById("driverName").value.trim();
+            const notes = document.getElementById("driverNotes").value.trim();
+
+            if (!name) {
+                showMessage("Please enter a driver name.", true);
+                return;
+            }
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            showMessage("Creating profile...");
+
+            try {
+                const response = await fetch("/api/profiles", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, notes })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Could not create profile.");
+                }
+
+                form.reset();
+                await loadProfiles(result.profile?.driver_id || "");
+                showMessage(result.message || "Profile created successfully.");
+            } catch (error) {
+                showMessage(error.message, true);
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        loadProfiles();
+    })();
+    </script>
+
 
 
 </body>
