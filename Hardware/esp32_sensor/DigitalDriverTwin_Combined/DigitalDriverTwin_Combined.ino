@@ -14,6 +14,16 @@ const long FINGER_THRESHOLD = 10000;
 
 MAX30105 particleSensor;
 
+
+const int GREEN_LED = 25;
+const int YELLOW_LED = 26;
+const int RED_LED = 27;
+const int BUZZER_PIN = 33;  // Active-low buzzer module
+
+char commandBuffer[24];
+byte commandIndex = 0;
+
+
 const byte RATE_SIZE = 4;
 byte rates[RATE_SIZE];
 byte rateSpot = 0;
@@ -49,8 +59,78 @@ bool readMPU(int16_t &ax, int16_t &ay, int16_t &az,
   return true;
 }
 
+
+void setRisk(const char* risk) {
+  // Turn all LEDs off first
+  digitalWrite(GREEN_LED, LOW);
+  digitalWrite(YELLOW_LED, LOW);
+  digitalWrite(RED_LED, LOW);
+
+  // Active-low buzzer: HIGH means OFF
+  digitalWrite(BUZZER_PIN, HIGH);
+
+  if (strcmp(risk, "LOW") == 0) {
+    digitalWrite(GREEN_LED, HIGH);
+  }
+  else if (strcmp(risk, "MEDIUM") == 0) {
+    digitalWrite(YELLOW_LED, HIGH);
+  }
+  else if (strcmp(risk, "HIGH") == 0) {
+    digitalWrite(RED_LED, HIGH);
+    digitalWrite(BUZZER_PIN, LOW);
+  }
+}
+
+void handleRiskCommands() {
+  while (Serial.available() > 0) {
+    char c = Serial.read();
+
+    if (c == '\r') continue;
+
+    if (c == '\n') {
+      commandBuffer[commandIndex] = '\0';
+
+      if (strcmp(commandBuffer, "LOW") == 0 ||
+          strcmp(commandBuffer, "RISK:LOW") == 0) {
+        setRisk("LOW");
+      }
+      else if (strcmp(commandBuffer, "MEDIUM") == 0 ||
+               strcmp(commandBuffer, "RISK:MEDIUM") == 0) {
+        setRisk("MEDIUM");
+      }
+      else if (strcmp(commandBuffer, "HIGH") == 0 ||
+               strcmp(commandBuffer, "RISK:HIGH") == 0) {
+        setRisk("HIGH");
+      }
+      else if (strcmp(commandBuffer, "OFF") == 0) {
+        setRisk("OFF");
+      }
+
+      commandIndex = 0;
+    }
+    else if (commandIndex < sizeof(commandBuffer) - 1) {
+      commandBuffer[commandIndex++] = c;
+    }
+    else {
+      commandIndex = 0;  // Discard an overlong command
+    }
+  }
+}
+
+
 void setup() {
   Serial.begin(115200);
+  
+  pinMode(GREEN_LED, OUTPUT);
+  pinMode(YELLOW_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  digitalWrite(GREEN_LED, LOW);
+  digitalWrite(YELLOW_LED, LOW);
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(BUZZER_PIN, HIGH);  // Buzzer OFF
+
   delay(1000);
 
   Wire.begin(SDA_PIN, SCL_PIN);
@@ -97,6 +177,9 @@ void setup() {
 }
 
 void loop() {
+  
+  handleRiskCommands();
+
   unsigned long now = millis();
 
   // Read MAX30102 frequently

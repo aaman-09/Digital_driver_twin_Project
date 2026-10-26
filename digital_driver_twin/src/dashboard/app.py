@@ -37,6 +37,10 @@ HARDWARE_CSV = os.path.join(
     BASE_DIR, "data", "hardware", "esp32_combined_sensor_log.csv"
 )
 
+RISK_FILE = os.path.join(
+    BASE_DIR, "data", "hardware", "current_risk.txt"
+)
+
 # Experimental ML condition classifier
 AI_MODEL_PATH = os.path.join(
     BASE_DIR, "models", "ml_condition_classifier.joblib"
@@ -201,6 +205,21 @@ def status():
     driver_data = get_latest_driver_data()
     hardware_data = get_latest_hardware_data()
     ai_prediction = get_ai_prediction(driver_data)
+
+    # Send camera risk level to the ESP32 reader via a shared file.
+    risk_level = str(driver_data.get("risk_level", "LOW")).upper()
+
+    if risk_level not in ("LOW", "MEDIUM", "HIGH"):
+        risk_level = "LOW"
+
+    try:
+        os.makedirs(os.path.dirname(RISK_FILE), exist_ok=True)
+
+        with open(RISK_FILE, "w", encoding="utf-8") as risk_file:
+            risk_file.write(risk_level)
+
+    except OSError as error:
+        print("RISK COMMAND FILE ERROR:", error)
 
     # Camera-based risk only.
     # This is NOT a validated combined driver-health risk score.
